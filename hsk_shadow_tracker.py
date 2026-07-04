@@ -1,8 +1,21 @@
 import streamlit as st
 import pandas as pd
 
+# 🌍 GLOBAL REAL-TIME MEMORY (Shared across ALL devices/browsers)
+if "GLOBAL_BOARD" not in st.__dict__:
+    st.__dict__["GLOBAL_BOARD"] = {
+        "hotel_inventory": {},
+        "file_processed": False
+    }
+
+global_storage = st.__dict__["GLOBAL_BOARD"]
+
 # --- UI Configuration ---
 st.set_page_config(page_title="Hsk Shadow PMS", layout="centered", page_icon="🏨", initial_sidebar_state="expanded")
+
+from streamlit_autorefresh import st_autorefresh
+# Run a silent refresh every 10 seconds to sync multi-device changes automatically
+st_autorefresh(interval=10000, key="global_board_sync")
 
 # Custom CSS for high-density mobile list layout and button color shifting
 st.markdown("""
@@ -44,13 +57,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
-# --- State Management Initialization ---
-if "file_processed" not in st.session_state:
-    st.session_state.file_processed = False
-
-if "hotel_inventory" not in st.session_state:
-    st.session_state.hotel_inventory = {}
 
 # --- PYTHON WIZ MEETING DATA BIZ EXTRACTION ---
 def process_uploaded_file(uploaded_file):
@@ -137,18 +143,18 @@ def process_uploaded_file(uploaded_file):
             st.error("⚠️ Processed the file but found 0 rooms. Check if the spreadsheet format has changed.")
             return
 
-        # Commit freshly extracted dataset directly to the interactive state engine
-        st.session_state.hotel_inventory = file_inventory
-        st.session_state.file_processed = True
+        # Commit freshly extracted dataset directly to the GLOBAL shared engine
+        global_storage["hotel_inventory"] = file_inventory
+        global_storage["file_processed"] = True
         st.rerun()
         
     except Exception as e:
-        st.error(f"Error parsing file structural data: {str(e)}")
+        st.error(f"Error parsing file: {str(e)}")
 
 # ==============================================================================
 # PHASE 1: THE ESTESTYLE LANDING & AUTOMATED FILE UPLOAD
 # ==============================================================================
-if not st.session_state.file_processed:
+if not global_storage["file_processed"]:
     st.write(" ")
     st.markdown("<h2 class='center' style='color:rgb(70, 130, 255);'>An EsteStyle Streamlit Page<br>Where Python Wiz Meets Data Biz!</h2>", unsafe_allow_html=True)
     st.markdown("<img src='https://1drv.ms/i/s!ArWyPNkF5S-foZspwsary83MhqEWiA?embed=1&width=307&height=307' width='300' style='display: block; margin: 0 auto;'>", unsafe_allow_html=True)
@@ -193,7 +199,8 @@ else:
     
     with top_c1:
         if st.button("🔄 Upload New Day File", use_container_width=True):
-            st.session_state.file_processed = False
+            global_storage["file_processed"] = False
+            global_storage["hotel_inventory"] = {}
             st.rerun()
             
     # ➕ THE EASIEST METHOD: A clean, expandable drop-down for manual additions
@@ -209,24 +216,23 @@ else:
                 if submit_new_rm:
                     if not new_rm:
                         st.error("Need a room number!")
-                    elif new_rm in st.session_state.hotel_inventory:
+                    elif new_rm in global_storage["hotel_inventory"]:
                         st.warning(f"RM {new_rm} is already on the board!")
                     else:
                         # Drop it straight into the live session state dictionary
-                        st.session_state.hotel_inventory[new_rm] = {
-                            "type": new_type if new_type else "UNK",
-                            "occupancy": "O",       # Default to Occupied
-                            "cleanliness": "D",     # Default to Dirty
-                            "workload": "F",        # Default to Flip
-                            "dnd": "No",
-                            "comment": ""
-                        }
-                        st.success(f"RM {new_rm} spawned!")
-                        st.rerun()
+                        global_storage["hotel_inventory"][new_rm] = {
+                        "type": new_type if new_type else "UNK",
+                        "occupancy": "O",
+                        "cleanliness": "D",
+                        "workload": "F",
+                        "dnd": "No",
+                        "comment": ""
+                    }
+                    st.rerun()
         
     st.markdown("<hr>", unsafe_allow_html=True)
     
-    inventory = st.session_state.hotel_inventory
+    inventory = global_storage["hotel_inventory"]
 
     for room_num in sorted(inventory.keys(), key=int):
         room = inventory[room_num]
@@ -247,11 +253,10 @@ else:
         else:
             status_badge = "⏳ <b>DIRTY</b>"
 
-        # Single Row Layout per Room Card
+        # Single Row Layout per Room
         with st.container():
             # 1. Fetch the room type from your state dictionary safely
-            room_details = st.session_state.hotel_inventory.get(room_num, {})
-            room_type = room_details.get("type", "UNK") # Defaults to Unknown if missing
+            room_type = room.get("type", "UNK") # Defaults to Unknown if missing
             
             # 2. Render the primary Room Number
             st.markdown(f"### RM {room_num}")
