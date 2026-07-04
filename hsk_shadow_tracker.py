@@ -167,11 +167,26 @@ if not global_storage["file_processed"]:
     
     st.write("")
     st.markdown("""
-    ### 🪜 Steps to Export Housekeeping Data:
-    1. Open your native Property Management System (PMS) dashboard.
-    2. Run your daily global room allocation work report.
-    3. Ensure the columns **RM**, **RM Type**, and **Status** are selected.
-    4. Click '**Export to Excel**' or save directly to your computer.
+    ### 🪜 Steps to Export Housekeeping Data on Visual Matrix:
+    1. Change user from 'Front Office' to 'Housekeeping'.
+    2. Select 'Room Assign' from ribbon.
+    3. Select 'Room Assignment' from ribbon.
+    4. Assign rooms.
+    5. Click 'Floppy Disk' icon to save.
+    6. Select 'Reports'
+    7. Select 'Assignment Report' from dropdown.
+    8. Click 'Export' button.
+    9. Select 'Excel' from dropdown.
+                
+    ### How to Use the Shadow PMS:
+    1. Upload the exported Excel file from the steps above.
+    2. After successful processing, click the "Initialize Shadow Board" button.
+    3. The live whiteboard will populate with all rooms and their statuses.
+    4. Use the buttons to update occupancy, cleanliness, workload, and DnD status.
+    5. Add operational notes in the text box for each room as needed.
+    6. The board will auto-refresh every 10 seconds to sync changes across devices.
+    7. To start a new day, click "Upload New Day File" to reset the board and upload a fresh Excel file.
+    8. A new room can be added manually using the "Add Manual Room" section, specifying the room number and type.
     """)
     
     st.write('---')
@@ -208,7 +223,7 @@ else:
         with st.expander("➕ Add Manual Room"):
             with st.form("manual_add_form", clear_on_submit=True):
                 new_rm = st.text_input("Room #", placeholder="e.g., 204").strip()
-                new_type = st.text_input("Type", placeholder="e.g., NK / NQ").strip().upper()
+                new_type = st.text_input("Type", placeholder="e.g., K / QQ").strip().upper()
                 
                 # Default presets for an ad-hoc mid-day add
                 submit_new_rm = st.form_submit_button("Add to Board", use_container_width=True)
@@ -272,30 +287,30 @@ else:
             
             # Row 1: Occupancy Toggles (O vs V)
             r1_c1, r1_c2, _ = st.columns([1, 1, 3])
-            if r1_c1.button("O", key=f"O_{room_num}_{state_suffix}", type="primary" if room["occupancy"] == "O" else "secondary", use_container_width=True):
+            if r1_c1.button("Occupied / Ocupado", key=f"O_{room_num}_{state_suffix}", type="primary" if room["occupancy"] == "O" else "secondary", use_container_width=True):
                 inventory[room_num]["occupancy"] = "O"
                 st.rerun()
             v_key = f"V_{room_num}_{state_suffix}_vswitch" if state_suffix == "normal" else f"V_{room_num}_{state_suffix}"
-            if r1_c2.button("V", key=v_key, type="primary" if room["occupancy"] == "V" else "secondary", use_container_width=True):
+            if r1_c2.button("Vacant / Disponible", key=v_key, type="primary" if room["occupancy"] == "V" else "secondary", use_container_width=True):
                 inventory[room_num]["occupancy"] = "V"
                 st.rerun()
                 
             # Row 2: Cleanliness Toggles (D vs C)
             r2_c1, r2_c2, _ = st.columns([1, 1, 3])
-            if r2_c1.button("D", key=f"D_{room_num}_{state_suffix}", type="primary" if room["cleanliness"] == "D" else "secondary", use_container_width=True):
+            if r2_c1.button("Dirty / Sucio", key=f"D_{room_num}_{state_suffix}", type="primary" if room["cleanliness"] == "D" else "secondary", use_container_width=True):
                 inventory[room_num]["cleanliness"] = "D"
                 st.rerun()
-            if r2_c2.button("C", key=f"C_{room_num}_{state_suffix}", type="primary" if room["cleanliness"] == "C" else "secondary", use_container_width=True):
+            if r2_c2.button("Clean / Limpio", key=f"C_{room_num}_{state_suffix}", type="primary" if room["cleanliness"] == "C" else "secondary", use_container_width=True):
                 inventory[room_num]["cleanliness"] = "C"
                 st.rerun()
 
             # Row 3: Workload Toggles (Flip vs Service)
             r3_c1, r3_c2, _ = st.columns([1, 1, 3])
-            if r3_c1.button("F", key=f"F_{room_num}_{state_suffix}", type="primary" if room["workload"] == "F" else "secondary", use_container_width=True):
+            if r3_c1.button("Flip / Cambiarla", key=f"F_{room_num}_{state_suffix}", type="primary" if room["workload"] == "F" else "secondary", use_container_width=True):
                 inventory[room_num]["workload"] = "F"
                 st.rerun()
             s_key = f"S_{room_num}_{state_suffix}_sswitch" if state_suffix == "normal" else f"S_{room_num}_{state_suffix}"
-            if r3_c2.button("S", key=s_key, type="primary" if room["workload"] == "S" else "secondary", use_container_width=True):
+            if r3_c2.button("Stay / Se Quedo", key=s_key, type="primary" if room["workload"] == "S" else "secondary", use_container_width=True):
                 inventory[room_num]["workload"] = "S"
                 st.rerun()
                 
