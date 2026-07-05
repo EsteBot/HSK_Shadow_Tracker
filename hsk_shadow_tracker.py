@@ -285,23 +285,23 @@ else:
 
             # --- The 4-Row Matrix Controller ---
             
-            # Row 1: Occupancy Toggles (O vs V)
+            # Row 1: Cleanliness Toggles (D vs C)
             r1_c1, r1_c2, _ = st.columns([1, 1, 3])
-            if r1_c1.button("Occupied / Ocupado", key=f"O_{room_num}_{state_suffix}", type="primary" if room["occupancy"] == "O" else "secondary", use_container_width=True):
+            if r1_c1.button("Dirty / Sucio", key=f"D_{room_num}_{state_suffix}", type="primary" if room["cleanliness"] == "D" else "secondary", use_container_width=True):
+                inventory[room_num]["cleanliness"] = "D"
+                st.rerun()
+            if r1_c2.button("Clean / Limpio", key=f"C_{room_num}_{state_suffix}", type="primary" if room["cleanliness"] == "C" else "secondary", use_container_width=True):
+                inventory[room_num]["cleanliness"] = "C"
+                st.rerun()
+            
+            # Row 2: Occupancy Toggles (O vs V)
+            r2_c1, r2_c2, _ = st.columns([1, 1, 3])
+            if r2_c1.button("Occupied / Ocupado", key=f"O_{room_num}_{state_suffix}", type="primary" if room["occupancy"] == "O" else "secondary", use_container_width=True):
                 inventory[room_num]["occupancy"] = "O"
                 st.rerun()
             v_key = f"V_{room_num}_{state_suffix}_vswitch" if state_suffix == "normal" else f"V_{room_num}_{state_suffix}"
-            if r1_c2.button("Vacant / Disponible", key=v_key, type="primary" if room["occupancy"] == "V" else "secondary", use_container_width=True):
+            if r2_c2.button("Vacant / Disponible", key=v_key, type="primary" if room["occupancy"] == "V" else "secondary", use_container_width=True):
                 inventory[room_num]["occupancy"] = "V"
-                st.rerun()
-                
-            # Row 2: Cleanliness Toggles (D vs C)
-            r2_c1, r2_c2, _ = st.columns([1, 1, 3])
-            if r2_c1.button("Dirty / Sucio", key=f"D_{room_num}_{state_suffix}", type="primary" if room["cleanliness"] == "D" else "secondary", use_container_width=True):
-                inventory[room_num]["cleanliness"] = "D"
-                st.rerun()
-            if r2_c2.button("Clean / Limpio", key=f"C_{room_num}_{state_suffix}", type="primary" if room["cleanliness"] == "C" else "secondary", use_container_width=True):
-                inventory[room_num]["cleanliness"] = "C"
                 st.rerun()
 
             # Row 3: Workload Toggles (Flip vs Service)
