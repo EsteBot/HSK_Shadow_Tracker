@@ -143,7 +143,7 @@ def process_uploaded_file(uploaded_file):
         df_to_upload.columns = ['RM', 'Type', 'Occupancy', 'Cleanliness', 'Workload', 'DnD', 'Comment']
         
         # Overwrite the spreadsheet entirely, obliterating yesterday's data
-        conn.update(data=df_to_upload)
+        conn.update(worksheet="Sheet1", data=df_to_upload)
         
         # Set a session flag just to kick this specific user into Phase 2 immediately
         st.session_state.just_uploaded = True
