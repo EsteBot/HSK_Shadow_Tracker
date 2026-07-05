@@ -2,3 +2,4 @@ pandas
 openpyxl
 xlrd
 streamlit-autorefresh
+streamlit-gsheets
