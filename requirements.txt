@@ -2,4 +2,4 @@ pandas
 openpyxl
 xlrd
 streamlit-autorefresh
-streamlit-gsheets
+st-gsheets-connection
