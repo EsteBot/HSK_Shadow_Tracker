@@ -150,7 +150,9 @@ def process_uploaded_file(uploaded_file):
         st.rerun()
         
     except Exception as e:
-        st.error(f"Error parsing file: {str(e)}")
+        # Temporarily raise the raw error so we can see the full stack trace
+        raise e
+        # st.error(f"Error parsing file: {str(e)}")
 
 # ==============================================================================
 # PHASE 1: THE ESTESTYLE LANDING & AUTOMATED FILE UPLOAD
