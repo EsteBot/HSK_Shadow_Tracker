@@ -262,7 +262,7 @@ else:
     live_df['RM'] = live_df['RM'].astype(str)
     inventory = live_df.set_index('RM').to_dict(orient='index')
 
-    for room_num in sorted(inventory.keys(), key=int):
+    for room_num in sorted(inventory.keys(), key=lambda x: int(float(x))):
         room = inventory[room_num]
         
         # Track state tags for macro button key routing selectors
