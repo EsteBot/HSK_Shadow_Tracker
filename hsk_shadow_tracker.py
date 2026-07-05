@@ -1,14 +1,9 @@
 import streamlit as st
 import pandas as pd
+from streamlit_gsheets import GSheetsConnection
 
-# 🌍 GLOBAL REAL-TIME MEMORY (Shared across ALL devices/browsers)
-if "GLOBAL_BOARD" not in st.__dict__:
-    st.__dict__["GLOBAL_BOARD"] = {
-        "hotel_inventory": {},
-        "file_processed": False
-    }
-
-global_storage = st.__dict__["GLOBAL_BOARD"]
+# Initialize the live Google Sheets Pipeline
+conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- UI Configuration ---
 st.set_page_config(page_title="Hsk Shadow PMS", layout="centered", page_icon="🏨", initial_sidebar_state="expanded")
@@ -143,9 +138,15 @@ def process_uploaded_file(uploaded_file):
             st.error("⚠️ Processed the file but found 0 rooms. Check if the spreadsheet format has changed.")
             return
 
-        # Commit freshly extracted dataset directly to the GLOBAL shared engine
-        global_storage["hotel_inventory"] = file_inventory
-        global_storage["file_processed"] = True
+        # 🧹 6:00 AM NUKE: Convert the parsed data into a clean DataFrame
+        df_to_upload = pd.DataFrame.from_dict(file_inventory, orient='index').reset_index()
+        df_to_upload.columns = ['RM', 'Type', 'Occupancy', 'Cleanliness', 'Workload', 'DnD', 'Comment']
+        
+        # Overwrite the spreadsheet entirely, obliterating yesterday's data
+        conn.update(data=df_to_upload)
+        
+        # Set a session flag just to kick this specific user into Phase 2 immediately
+        st.session_state.just_uploaded = True
         st.rerun()
         
     except Exception as e:
@@ -154,7 +155,15 @@ def process_uploaded_file(uploaded_file):
 # ==============================================================================
 # PHASE 1: THE ESTESTYLE LANDING & AUTOMATED FILE UPLOAD
 # ==============================================================================
-if not global_storage["file_processed"]:
+# Check the current live state of the sheet to decide which layout to route to
+try:
+    live_df = conn.read(ttl="2s")
+except Exception:
+    live_df = pd.DataFrame()
+
+is_board_active = not live_df.empty
+
+if not is_board_active:
     st.write(" ")
     st.markdown("<h2 class='center' style='color:rgb(70, 130, 255);'>An EsteStyle Streamlit Page<br>Where Python Wiz Meets Data Biz!</h2>", unsafe_allow_html=True)
     st.markdown("<img src='https://1drv.ms/i/s!ArWyPNkF5S-foZspwsary83MhqEWiA?embed=1&width=307&height=307' width='300' style='display: block; margin: 0 auto;'>", unsafe_allow_html=True)
@@ -192,7 +201,7 @@ if not global_storage["file_processed"]:
     st.write('---')
     st.subheader("📊 Process File for Live Tracking:")
     
-    # 🔒 Wrap everything in a form to lock down the upload state until the button is clicked
+    # Wrap everything in a form to lock down the upload state until the button is clicked
     with st.form("hsk_upload_form", clear_on_submit=False):
         uploaded_file = st.file_uploader(label="Upload guest list Excel file", type=['xls', 'xlsx'], label_visibility="collapsed")
         submit_button = st.form_submit_button("🚀 Initialize Shadow Board", use_container_width=True)
@@ -213,9 +222,9 @@ else:
     top_c1, top_c2 = st.columns([1, 1])
     
     with top_c1:
+        # DAILY RESET: Wipes out the rows in the Google Sheet, forcing the app back to Phase 1
         if st.button("🔄 Upload New Day File", use_container_width=True):
-            global_storage["file_processed"] = False
-            global_storage["hotel_inventory"] = {}
+            conn.clear()
             st.rerun()
             
     # ➕ THE EASIEST METHOD: A clean, expandable drop-down for manual additions
@@ -231,39 +240,41 @@ else:
                 if submit_new_rm:
                     if not new_rm:
                         st.error("Need a room number!")
-                    elif new_rm in global_storage["hotel_inventory"]:
+                    # Check the live DataFrame for duplicates
+                    elif str(new_rm) in live_df['RM'].astype(str).values:
                         st.warning(f"RM {new_rm} is already on the board!")
                     else:
-                        # Drop it straight into the live session state dictionary
-                        global_storage["hotel_inventory"][new_rm] = {
-                        "type": new_type if new_type else "UNK",
-                        "occupancy": "O",
-                        "cleanliness": "D",
-                        "workload": "F",
-                        "dnd": "No",
-                        "comment": ""
-                    }
-                    st.rerun()
+                        # Append the new room row directly into the Google Sheet
+                        new_row = pd.DataFrame([{
+                            "RM": str(new_rm), "Type": new_type if new_type else "UNK",
+                            "Occupancy": "O", "Cleanliness": "D", "Workload": "F",
+                            "DnD": "No", "Comment": ""
+                        }])
+                        updated_df = pd.concat([live_df, new_row], ignore_index=True)
+                        conn.update(data=updated_df)
+                        st.rerun()
         
     st.markdown("<hr>", unsafe_allow_html=True)
     
-    inventory = global_storage["hotel_inventory"]
+    # Structure the Google Sheet DataFrame rows into our dictionary loop format
+    live_df['RM'] = live_df['RM'].astype(str)
+    inventory = live_df.set_index('RM').to_dict(orient='index')
 
     for room_num in sorted(inventory.keys(), key=int):
         room = inventory[room_num]
         
         # Track state tags for macro button key routing selectors
-        if room["dnd"] == "DnD":
+        if room["DnD"] == "DnD":
             state_suffix = "dnd"
-        elif room["cleanliness"] == "C":
+        elif room["Cleanliness"] == "C":
             state_suffix = "clean"
         else:
             state_suffix = "normal"
         
         # Set clean text HTML status badge flags
-        if room['dnd'] == "DnD":
+        if room['DnD'] == "DnD":
             status_badge = "🔴 <b>DND ACTIVE</b>"
-        elif room['cleanliness'] == "C":
+        elif room['Cleanliness'] == "C":
             status_badge = "✅ <b>READY</b>"
         else:
             status_badge = "⏳ <b>DIRTY</b>"
@@ -271,7 +282,7 @@ else:
         # Single Row Layout per Room
         with st.container():
             # 1. Fetch the room type from your state dictionary safely
-            room_type = room.get("type", "UNK") # Defaults to Unknown if missing
+            room_type = room.get("Type", "UNK") # Defaults to Unknown if missing
             
             # 2. Render the primary Room Number
             st.markdown(f"### RM {room_num}")
@@ -283,63 +294,77 @@ else:
             st.markdown(f"<div class='status-text'>{status_badge}</div>", unsafe_allow_html=True)
             st.write(" ")
 
+            # Find the row index inside our DataFrame so we can overwrite it when clicked
+            row_idx = live_df[live_df['RM'] == room_num].index[0]
+
             # --- The 4-Row Matrix Controller ---
-            
+
             # Row 1: Cleanliness Toggles (D vs C)
             r1_c1, r1_c2, _ = st.columns([1, 1, 3])
-            if r1_c1.button("Dirty / Sucio", key=f"D_{room_num}_{state_suffix}", type="primary" if room["cleanliness"] == "D" else "secondary", use_container_width=True):
-                inventory[room_num]["cleanliness"] = "D"
+            if r1_c1.button("Dirty / Sucio", key=f"D_{room_num}_{state_suffix}", type="primary" if room["Cleanliness"] == "D" else "secondary", use_container_width=True):
+                live_df.at[row_idx, "Cleanliness"] = "D"
+                conn.update(data=live_df)
                 st.rerun()
-            if r1_c2.button("Clean / Limpio", key=f"C_{room_num}_{state_suffix}", type="primary" if room["cleanliness"] == "C" else "secondary", use_container_width=True):
-                inventory[room_num]["cleanliness"] = "C"
+            if r1_c2.button("Clean / Limpio", key=f"C_{room_num}_{state_suffix}", type="primary" if room["Cleanliness"] == "C" else "secondary", use_container_width=True):
+                live_df.at[row_idx, "Cleanliness"] = "C"
+                conn.update(data=live_df)
                 st.rerun()
             
             # Row 2: Occupancy Toggles (O vs V)
             r2_c1, r2_c2, _ = st.columns([1, 1, 3])
-            if r2_c1.button("Occupied / Ocupado", key=f"O_{room_num}_{state_suffix}", type="primary" if room["occupancy"] == "O" else "secondary", use_container_width=True):
-                inventory[room_num]["occupancy"] = "O"
+            if r2_c1.button("Occupied / Ocupado", key=f"O_{room_num}_{state_suffix}", type="primary" if room["Occupancy"] == "O" else "secondary", use_container_width=True):
+                live_df.at[row_idx, "Occupancy"] = "O"
+                conn.update(data=live_df)
                 st.rerun()
             v_key = f"V_{room_num}_{state_suffix}_vswitch" if state_suffix == "normal" else f"V_{room_num}_{state_suffix}"
-            if r2_c2.button("Vacant / Disponible", key=v_key, type="primary" if room["occupancy"] == "V" else "secondary", use_container_width=True):
-                inventory[room_num]["occupancy"] = "V"
+            if r2_c2.button("Vacant / Disponible", key=v_key, type="primary" if room["Occupancy"] == "V" else "secondary", use_container_width=True):
+                live_df.at[row_idx, "Occupancy"] = "V"
+                conn.update(data=live_df)
                 st.rerun()
 
             # Row 3: Workload Toggles (Flip vs Service)
             r3_c1, r3_c2, _ = st.columns([1, 1, 3])
-            if r3_c1.button("Flip / Cambiarla", key=f"F_{room_num}_{state_suffix}", type="primary" if room["workload"] == "F" else "secondary", use_container_width=True):
-                inventory[room_num]["workload"] = "F"
+            if r3_c1.button("Flip / Cambiarla", key=f"F_{room_num}_{state_suffix}", type="primary" if room["Workload"] == "F" else "secondary", use_container_width=True):
+                live_df.at[row_idx, "Workload"] = "F"
+                conn.update(data=live_df)
                 st.rerun()
+
             s_key = f"S_{room_num}_{state_suffix}_sswitch" if state_suffix == "normal" else f"S_{room_num}_{state_suffix}"
-            if r3_c2.button("Stay / Se Quedo", key=s_key, type="primary" if room["workload"] == "S" else "secondary", use_container_width=True):
-                inventory[room_num]["workload"] = "S"
+            if r3_c2.button("Stay / Se Quedo", key=s_key, type="primary" if room["Workload"] == "S" else "secondary", use_container_width=True):
+                live_df.at[row_idx, "Workload"] = "S"
+                conn.update(data=live_df)
                 st.rerun()
                 
             # Row 4: Standalone DnD Toggle at the bottom
             r4_c1, _ = st.columns([2, 3])
-            is_dnd_active = room["dnd"] == "DnD"
+            is_dnd_active = room["DnD"] == "DnD"
             dnd_button_label = "🛑 Do Not Disturb O" if is_dnd_active else "⚪ Set DnD Sign"
             if r4_c1.button(dnd_button_label, key=f"DnD_{room_num}", type="primary" if is_dnd_active else "secondary", use_container_width=True):
-                inventory[room_num]["dnd"] = "No" if is_dnd_active else "DnD"
+                live_df.at[row_idx, "DnD"] = "No" if is_dnd_active else "DnD"
+                conn.update(data=live_df)
                 st.rerun()
 
             # 💬 Row 5: Dynamic Operational Notes/Comments Field
             st.write(" ")
             
             # Fetch existing comment if it exists, default to empty string
-            current_comment = room.get("comment", "")
+            current_comment = str(room.get("Comment", ""))
+            if current_comment.lower() == 'nan':
+                current_comment = ""
             
             # Text input box that saves to session state instantly on pressing Enter
             updated_comment = st.text_input(
                 "📋 Operational Notes:",
                 value=current_comment,
                 key=f"note_{room_num}",
-                placeholder="Add any operational notes here...",
+                placeholder="Add notes / notas...",
                 label_visibility="collapsed" # Keeps layout dense on mobile screens
             )
             
             # If the user edits the text, update the master database state silently
             if updated_comment != current_comment:
-                inventory[room_num]["comment"] = updated_comment
+                live_df.at[row_idx, "Comment"] = updated_comment
+                conn.update(data=live_df)
                 st.rerun()
 
         st.markdown("<hr>", unsafe_allow_html=True)
