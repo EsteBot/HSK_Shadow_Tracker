@@ -258,8 +258,8 @@ else:
         
     st.markdown("<hr>", unsafe_allow_html=True)
     
-    # Structure the Google Sheet DataFrame rows into our dictionary loop format
     live_df['RM'] = live_df['RM'].astype(str)
+    live_df['Comment'] = live_df['Comment'].astype(object) # 👈 ADD THIS LINE HERE
     inventory = live_df.set_index('RM').to_dict(orient='index')
 
     for room_num in sorted(inventory.keys(), key=lambda x: int(float(x))):
