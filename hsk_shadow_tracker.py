@@ -258,8 +258,10 @@ else:
         
     st.markdown("<hr>", unsafe_allow_html=True)
     
-    live_df['RM'] = live_df['RM'].astype(str)
-    live_df['Comment'] = live_df['Comment'].astype(object) # 👈 ADD THIS LINE HERE
+    # Structure the Google Sheet DataFrame rows into our dictionary loop format
+    # Line strips away the .0 decimal if it exists
+    live_df['RM'] = live_df['RM'].astype(str).str.replace(r'\.0$', '', regex=True)
+    live_df['Comment'] = live_df['Comment'].astype(object)
     inventory = live_df.set_index('RM').to_dict(orient='index')
 
     for room_num in sorted(inventory.keys(), key=lambda x: int(float(x))):
