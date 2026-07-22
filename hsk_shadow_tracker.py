@@ -390,7 +390,7 @@ else:
     # 1. VACANT DIRTY COLUMN (HIGH PRIORITY FLIPS)
     # ==========================================
     with col_vd:
-        st.markdown(f"### 🔴 V/D&nbsp;(`{len(vd_rooms)}`)")
+        st.markdown(f"<h3 style='white-space: nowrap; margin-bottom: 0;'>🔴 V/D (<code>{len(vd_rooms)}</code>)</h3>", unsafe_allow_html=True)
         st.caption("Check-outs")
         
         for rm, data in vd_rooms:
@@ -422,7 +422,7 @@ else:
     # 2. OCCUPIED COLUMN (STAYS & DUES)
     # ==========================================
     with col_od:
-        st.markdown(f"### 🔵 O/D&nbsp;(`{len(od_rooms)}`)")
+        st.markdown(f"<h3 style='white-space: nowrap; margin-bottom: 0;'>🔵 O/D (<code>{len(od_rooms)}</code>)</h3>", unsafe_allow_html=True)
         st.caption("Due-outs & Stayovers")
         
         for rm, data in od_rooms:
@@ -488,7 +488,7 @@ else:
     # 3. VACANT CLEAN COLUMN (READY TO RENT)
     # ==========================================
     with col_vc:
-        st.markdown(f"### 🟢 V/C&nbsp;(`{len(vc_rooms)}`)")
+        st.markdown(f"<h3 style='white-space: nowrap; margin-bottom: 0;'>🟢 V/C (<code>{len(vc_rooms)}</code>)</h3>", unsafe_allow_html=True)
         st.caption("Clean & Ready")
         
         for rm, data in vc_rooms:
