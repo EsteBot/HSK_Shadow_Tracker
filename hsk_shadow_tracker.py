@@ -276,50 +276,32 @@ else:
         st.cache_data.clear()
         st.rerun()
 
-    # Updated UI Expander
+    # --- UI COMPONENT: UNSCHEDULED ROOM ADDITION ---
     with st.expander("➕ **Add Unscheduled Room (Early Checkout or Service Request)**"):
         c_rm, c_note, c_co, c_stay = st.columns([1.5, 2.5, 1.5, 1.5])
         
         with c_rm:
-            add_rm = st.text_input("Room #", placeholder="e.g. 302", key="add_rm_key")
-        with c_note:
-            add_note = st.text_input("Special Note (Optional)", placeholder="e.g., Has dog / Towels only", key="add_note_key")
-        with c_co:
-            st.write(" ")
-            st.write(" ")
-            if st.button("🚨 Early Checkout", key="btn_co"):
-                if add_rm:
-                    inject_unscheduled_room(add_rm, 'checkout', add_note)
-        with c_stay:
-            st.write(" ")
-            st.write(" ")
-            if st.button("🔵 Service Request", key="btn_stay"):
-                if add_rm:
-                    inject_unscheduled_room(add_rm, 'service', add_note)
-
-    # --- UI COMPONENT: UNSCHEDULED ROOM ADDITION ---
-    with st.expander("➕ **Add Unscheduled Room (Early Checkout or Service Request)**"):
-        col_input, col_co_btn, col_stay_btn = st.columns([2, 1.5, 1.5])
-        
-        with col_input:
             add_rm = st.text_input("Room #", placeholder="e.g., 302", key="add_unscheduled_rm")
-        
-        with col_co_btn:
+            
+        with c_note:
+            add_note = st.text_input("Special Note (Optional)", placeholder="e.g., Has dog / Towels only", key="add_unscheduled_note")
+            
+        with c_co:
             st.write(" ") # Spacing shift for vertical alignment
             st.write(" ")
             if st.button("🚨 Early Checkout (Flip)", key="btn_add_co"):
                 if add_rm:
-                    inject_unscheduled_room(add_rm, action_type='checkout')
+                    inject_unscheduled_room(add_rm, action_type='checkout', note=add_note)
                     st.toast(f"Room {add_rm} added as Vacant Dirty Flip!", icon="🚨")
                 else:
                     st.warning("Enter a room # first!")
 
-        with col_stay_btn:
+        with c_stay:
             st.write(" ")
             st.write(" ")
             if st.button("🔵 Service Request (Stay)", key="btn_add_stay"):
                 if add_rm:
-                    inject_unscheduled_room(add_rm, action_type='service')
+                    inject_unscheduled_room(add_rm, action_type='service', note=add_note)
                     st.toast(f"Room {add_rm} added as Stayover Service!", icon="🔵")
                 else:
                     st.warning("Enter a room # first!")
