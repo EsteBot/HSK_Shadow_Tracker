@@ -521,10 +521,10 @@ else:
         st.caption("Clean & Ready")
         
         # 1. SORTING: Unflipped ('No'/None) stay on top, Flipped ('Yes') drop to the bottom!
-        vc_rooms_sorted = sorted(vc_rooms, key=lambda x: 1 if x[1].get('vm_flipped') == 'Yes' else 0)
+        vc_rooms_sorted = sorted(vc_rooms, key=lambda x: 1 if x[1].get('Vm_Flipped') == 'Yes' else 0)
         
         for rm, data in vc_rooms_sorted:
-            is_flipped = data.get('Vm_flipped') == 'Yes'
+            is_flipped = data.get('Vm_Flipped') == 'Yes'
             
             # 2. VISUAL STYLING: Grey out & dim if already flipped in Visual Matrix
             if is_flipped:
