@@ -130,7 +130,8 @@ def process_uploaded_file(uploaded_file):
                     "cleanliness": cleanliness_code, 
                     "workload": workload_code,
                     "dnd": "No",
-                    "comment": ""
+                    "comment": "",
+                    "Vm_Flipped": "No"
                 }
                 
         # 🛠️ SAFETY CHECK: Verify inventory built successfully from the workbook
@@ -140,7 +141,7 @@ def process_uploaded_file(uploaded_file):
 
         # 🧹 6:00 AM NUKE: Convert the parsed data into a clean DataFrame
         df_to_upload = pd.DataFrame.from_dict(file_inventory, orient='index').reset_index()
-        df_to_upload.columns = ['RM', 'Type', 'Occupancy', 'Cleanliness', 'Workload', 'DnD', 'Comment']
+        df_to_upload.columns = ['RM', 'Type', 'Occupancy', 'Cleanliness', 'Workload', 'DnD', 'Comment', 'Vm_Flipped']
         
         # Overwrite the spreadsheet entirely, obliterating yesterday's data
         conn.update(worksheet="Sheet1", data=df_to_upload)
@@ -164,9 +165,12 @@ except Exception:
 is_board_active = not live_df.empty
 
 if is_board_active:
-    # STEP 1: Ensure the Note column exists in the active DataFrame
+    
     if 'Note' not in live_df.columns:
         live_df['Note'] = ''
+
+    if 'Vm_Flipped' not in live_df.columns:
+        live_df['Vm_Flipped'] = 'No'
 
 if not is_board_active:
     st.write(" ")
@@ -222,6 +226,31 @@ if not is_board_active:
 else:
     st.write(" ")
     st.title("✨ Shadow PMS 🥷")
+
+    # --- ADMIN SAFEGUARD: NEW DAY RESET ---
+    with st.expander("⚙️ Admin Options / Load New Day's Assignment Sheet"):
+        st.caption("⚠️ Use this section only at the start of a new shift to load a fresh Visual Matrix export.")
+        
+        # 1. File Uploader restricted strictly to Excel (.xls, .xlsx)
+        admin_uploaded_file = st.file_uploader(
+            "Upload Today's Assignment File (.xls, .xlsx)", 
+            type=['xls', 'xlsx'],
+            key="admin_day_reset_uploader"
+        )
+        
+        if admin_uploaded_file is not None:
+            st.warning("⚠️ Loading a new file will OVERWRITE all active room progress for today!")
+            
+            # 2. Safety Checkbox to unlock the action button
+            confirm_reset = st.checkbox("I understand this will wipe today's live board and reset all room statuses.", key="chk_confirm_reset")
+            
+            # 3. Action Button (Only enabled when box is checked)
+            if st.button("🚀 Overwrite & Initialize New Day", disabled=not confirm_reset, type="primary", key="btn_admin_reset"):
+                with st.spinner("Processing new assignment sheet..."):
+                    # Calls your exact existing parsing & upload logic!
+                    process_uploaded_file(admin_uploaded_file)
+    
+    st.markdown("---")
     
     # Create two columns up top to balance the layout
     top_c1, top_c2 = st.columns([1, 1])
@@ -236,7 +265,7 @@ else:
 
     # 2. OCCUPIED DIRTY (SERVICING)
     with col_od:
-        st.subheader("🔵 Occup'd Dirty (O/D)")
+        st.subheader("🔵 Stay Over (S/O)")
         # Filter & render Stayover / Due Out rooms
 
     # 3. VACANT CLEAN (READY TO RENT)
@@ -307,7 +336,7 @@ else:
                     st.warning("Enter a room # first!")
     
     # --- MAIN OPERATIONAL SHADOW BOARD ---
-    st.markdown("## 🛎️ HSK Hub")
+    st.markdown("## 🛎️ Room List")
 
     # Strip accidental float decimals: '105.0' -> '105'
     live_df['RM'] = live_df['RM'].astype(str).str.replace('.0', '', regex=False)
@@ -422,7 +451,7 @@ else:
     # 2. OCCUPIED COLUMN (STAYS & DUES)
     # ==========================================
     with col_od:
-        st.markdown(f"<h3 style='white-space: nowrap; margin-bottom: 0;'>🔵 O/D (<code>{len(od_rooms)}</code>)</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='white-space: nowrap; margin-bottom: 0;'>🔵 S/O (<code>{len(od_rooms)}</code>)</h3>", unsafe_allow_html=True)
         st.caption("Due-outs & Stayovers")
         
         for rm, data in od_rooms:
@@ -491,22 +520,51 @@ else:
         st.markdown(f"<h3 style='white-space: nowrap; margin-bottom: 0;'>🟢 V/C (<code>{len(vc_rooms)}</code>)</h3>", unsafe_allow_html=True)
         st.caption("Clean & Ready")
         
-        for rm, data in vc_rooms:
-            card_style = "background-color: #e6f4ea; color: #137333; border-left: 6px solid #34a853;"
-            badge = "🟢 READY"
+        # 1. SORTING: Unflipped ('No'/None) stay on top, Flipped ('Yes') drop to the bottom!
+        vc_rooms_sorted = sorted(vc_rooms, key=lambda x: 1 if x[1].get('vm_flipped') == 'Yes' else 0)
+        
+        for rm, data in vc_rooms_sorted:
+            is_flipped = data.get('vm_flipped') == 'Yes'
+            
+            # 2. VISUAL STYLING: Grey out & dim if already flipped in Visual Matrix
+            if is_flipped:
+                card_style = "background-color: #f1f3f4; color: #5f6368; border-left: 6px solid #9aa0a6; opacity: 0.65;"
+                badge = "✔️ IN VM"
+            else:
+                card_style = "background-color: #e6f4ea; color: #137333; border-left: 6px solid #34a853;"
+                badge = "🟢 READY"
             
             with st.container():
-                # 1. Draw Card with helper & capture note_text
+                # Draw Card with helper & capture note_text
                 note_text = render_room_card(rm, data, card_style, badge)
                 
-                # 2. Action Popover
+                # Action Popover
                 with st.popover(f"⚙️ Action: Room {rm}"):
+                    # --- VM FLIP ACTION BUTTON ---
+                    if not is_flipped:
+                        if st.button("💻 Mark Flipped in VM", key=f"flip_vm_{rm}", type="primary"):
+                            idx = live_df[live_df['RM'] == str(rm)].index[0]
+                            live_df.at[idx, 'Vm_Flipped'] = 'Yes'
+                            conn.update(worksheet="Sheet1", data=live_df)
+                            st.cache_data.clear()
+                            st.toast(f"Room {rm} marked as Flipped in Visual Matrix!", icon="💻")
+                            st.rerun()
+                    else:
+                        if st.button("↩️ Unmark VM Status", key=f"unflip_vm_{rm}"):
+                            idx = live_df[live_df['RM'] == str(rm)].index[0]
+                            live_df.at[idx, 'Vm_Flipped'] = 'No'
+                            conn.update(worksheet="Sheet1", data=live_df)
+                            st.cache_data.clear()
+                            st.rerun()
+
+                    st.divider()
+
                     if st.button("↩️ Re-open as Dirty", key=f"reopen_{rm}"):
                         update_room_state(rm, new_cln='D')
 
                     st.divider()
                     
-                    # 3. Note Editor
+                    # Note Editor
                     updated_note = st.text_input("Room Note / Instruction", value=note_text, key=f"note_vc_{rm}")
                     if st.button("💾 Save Note", key=f"save_vc_note_{rm}"):
                         idx = live_df[live_df['RM'] == str(rm)].index[0]
