@@ -5,7 +5,12 @@ from streamlit_gsheets import GSheetsConnection
 # Initialize the live Google Sheets Pipeline
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-st.set_page_config(page_title="Housekeeping Hub", page_icon="🧼", layout="wide")
+st.set_page_config(
+    page_title="Housekeeping Hub", 
+    page_icon="🧼", 
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
 # ==============================================================================
 # SIDEBAR: SOPS, HELP & QUICK UTILITIES
