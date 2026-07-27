@@ -402,7 +402,7 @@ else:
         f"""
         <div style="height: 65px;">
             <h3 style="margin: 0; padding: 0; white-space: nowrap;">🔴 V/D (<code>{len(vd_rooms)}<code>)</h3>
-            <p style="margin: 0; padding: 0; color: gray; font-size: 0.9rem;">Check-outs</p>
+            <p style="margin: 0; padding: 0; color: gray; font-size: 0.9rem;">Check-outssss</p>
         </div>
         """, 
         unsafe_allow_html=True
