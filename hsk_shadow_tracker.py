@@ -5,8 +5,38 @@ from streamlit_gsheets import GSheetsConnection
 # Initialize the live Google Sheets Pipeline
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-# --- UI Configuration ---
-st.set_page_config(page_title="Hsk Shadow PMS", layout="centered", page_icon="🏨", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Housekeeping Hub", page_icon="🧼", layout="wide")
+
+# ==============================================================================
+# SIDEBAR: SOPS, HELP & QUICK UTILITIES
+# ==============================================================================
+with st.sidebar:
+    st.title("🛎️ Housekeeping Hub")
+    st.caption("Shadow PMS Operations")
+    
+    st.divider()
+    
+    # Collapsible Visual Matrix SOP Guide
+    with st.expander("📖 Visual Matrix Export SOP"):
+        st.markdown("""
+        **1.** Switch user to **Housekeeping**  
+        **2.** Select **Room Assign** $\rightarrow$ **Room Assignment**  
+        **3.** Assign rooms & click **Floppy Disk** icon to save  
+        **4.** Go to **Reports** $\rightarrow$ **Assignment Report**  
+        **5.** Click **Export** $\rightarrow$ **Excel**
+        """)
+        
+    with st.expander("❓ How to Use the Board"):
+        st.markdown("""
+        * **🔴 V/D:** Check-outs that need cleaning.
+        * **🟡 O/C:** Stayovers or occupied rooms.
+        * **🟢 V/C:** Clean & ready rooms. Click **Mark Flipped in VM** once pushed to the PMS.
+        * **↩️ Undo:** Reverts accidental check-outs back to Occupied status.
+        """)
+
+    st.divider()
+    st.caption("Originally created for Best Western at Firestone")
+    st.caption("By Esteban C Loetz")
 
 from streamlit_autorefresh import st_autorefresh
 # Run a silent refresh every 10 seconds to sync multi-device changes automatically
@@ -154,74 +184,28 @@ def process_uploaded_file(uploaded_file):
         st.error(f"Error parsing file: {str(e)}")
 
 # ==============================================================================
-# PHASE 1: THE ESTESTYLE LANDING & AUTOMATED FILE UPLOAD
+# DATA INITIALIZATION & COLUMN INTEGRITY
 # ==============================================================================
-# Check the current live state of the sheet to decide which layout to route to
 try:
     live_df = conn.read(ttl="2s")
-except Exception:
-    live_df = pd.DataFrame()
+except Exception as e:
+    st.error("⚠️ Unable to connect to Google Sheets. Please check your network or connection secrets.")
+    st.stop()
 
-is_board_active = not live_df.empty
+# Graceful fallback for empty sheet
+if live_df.empty:
+    st.info("ℹ️ The Shadow Board is currently empty. Add rooms or sync your Google Sheet to get started!")
+    st.stop()
 
-if is_board_active:
-    
-    if 'Note' not in live_df.columns:
-        live_df['Note'] = ''
+# Ensure required operational tracking columns exist
+if 'Note' not in live_df.columns:
+    live_df['Note'] = ''
 
-    if 'Vm_Flipped' not in live_df.columns:
-        live_df['Vm_Flipped'] = 'No'
-
-if not is_board_active:
-    st.write(" ")
-    st.markdown("<h2 class='center' style='color:rgb(70, 130, 255);'>An EsteStyle Streamlit Page<br>Where Python Wiz Meets Data Biz!</h2>", unsafe_allow_html=True)
-    st.markdown("<img src='https://1drv.ms/i/s!ArWyPNkF5S-foZspwsary83MhqEWiA?embed=1&width=307&height=307' width='300' style='display: block; margin: 0 auto;'>", unsafe_allow_html=True)
-    st.markdown("<h3 class='center' style='color: rgb(135, 206, 250);'>🏨 Originally created for Best Western at Firestone 🛎️</h3>", unsafe_allow_html=True)
-    st.markdown("<h3 class='center' style='color: rgb(135, 206, 250);'>🤖 By Esteban C Loetz 📟</h3>", unsafe_allow_html=True)
-    st.markdown("##")
-    st.markdown("---")
-    st.markdown("<h2 class='center' style='color: rgb(112, 128, 140);'>🧼 Shadow PMS Automator 📋</h2>", unsafe_allow_html=True)
-    st.markdown("<h4 class='center'>Drop the daily data pull to activate the live whiteboard.</h4>", unsafe_allow_html=True)
-    
-    st.write("")
-    st.markdown("""
-    ### 🪜 Steps to Export Housekeeping Data on Visual Matrix:
-    1. Change user from 'Front Office' to 'Housekeeping'.
-    2. Select 'Room Assign' from ribbon.
-    3. Select 'Room Assignment' from ribbon.
-    4. Assign rooms.
-    5. Click 'Floppy Disk' icon to save.
-    6. Select 'Reports'
-    7. Select 'Assignment Report' from dropdown.
-    8. Click 'Export' button.
-    9. Select 'Excel' from dropdown.
-                
-    ### How to Use the Shadow PMS:
-    1. Upload the exported Excel file from the steps above.
-    2. After successful processing, click the "Initialize Shadow Board" button.
-    3. The live whiteboard will populate with all rooms and their statuses.
-    4. Use the buttons to update occupancy, cleanliness, workload, and DnD status.
-    5. Add operational notes in the text box for each room as needed.
-    6. The board will auto-refresh every 10 seconds to sync changes across devices.
-    7. To start a new day, click "Upload New Day File" to reset the board and upload a fresh Excel file.
-    8. A new room can be added manually using the "Add Manual Room" section, specifying the room number and type.
-    """)
-    
-    st.write('---')
-    st.subheader("📊 Process File for Live Tracking:")
-    
-    # Wrap everything in a form to lock down the upload state until the button is clicked
-    with st.form("hsk_upload_form", clear_on_submit=False):
-        uploaded_file = st.file_uploader(label="Upload guest list Excel file", type=['xls', 'xlsx'], label_visibility="collapsed")
-        submit_button = st.form_submit_button("🚀 Initialize Shadow Board", use_container_width=True)
-
-        if submit_button and uploaded_file is not None:
-            process_uploaded_file(uploaded_file)
-        elif submit_button and uploaded_file is None:
-            st.warning("⚠️ Please select a valid Excel file first before attempting to initialize.")
+if 'Vm_Flipped' not in live_df.columns:
+    live_df['Vm_Flipped'] = 'No'
 
 # ==============================================================================
-# PHASE 2: THE LIVE WHITEBOARD APP
+# MAIN SHADOW BOARD UI STARTS HERE
 # ==============================================================================
 else:
     st.write(" ")
@@ -419,7 +403,7 @@ else:
     # 1. VACANT DIRTY COLUMN (HIGH PRIORITY FLIPS)
     # ==========================================
     with col_vd:
-        st.markdown(f"<h3 style='white-space: nowrap; margin-bottom: 0;'>🔴 V/D (<code>{len(vd_rooms)}</code>)</h3>", unsafe_allow_html=True)
+        sst.markdown(f"<h3 style='margin-bottom: 0;'><span style='white-space: nowrap;'>🔴 V/D (<code>{len(vd_rooms)}</code>)</span></h3>", unsafe_allow_html=True)
         st.caption("Check-outs")
         
         for rm, data in vd_rooms:
@@ -428,7 +412,6 @@ else:
 
             with st.container():
                 # 1. Draw the whole card automatically & grab the note!
-                # (Make sure to remove 'self.' if render_room_card isn't inside a class)
                 note_text = render_room_card(rm, data, card_style, badge)
                 
                 # 2. Action Popover
@@ -436,6 +419,14 @@ else:
                     if st.button("✨ Mark Clean & Ready", key=f"cln_vd_{rm}"):
                         update_room_state(rm, new_cln='C')
                     
+                    st.divider()
+
+                    # 🆕 UNDO CHECKOUT: Reverts room back to Occupied Dirty
+                    if st.button("↩️ Undo Checkout (Mark Occupied)", key=f"undo_co_{rm}"):
+                        update_room_state(rm, new_occ='O', new_cln='D')
+                        st.toast(f"Room {rm} reverted to Occupied!", icon="↩️")
+                        st.rerun()
+
                     st.divider()
                     
                     # 3. Note Editor
@@ -517,7 +508,7 @@ else:
     # 3. VACANT CLEAN COLUMN (READY TO RENT)
     # ==========================================
     with col_vc:
-        st.markdown(f"<h3 style='white-space: nowrap; margin-bottom: 0;'>🟢 V/C (<code>{len(vc_rooms)}</code>)</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='margin-bottom: 0;'><span style='white-space: nowrap;'>🟢 V/C (<code>{len(vc_rooms)}</code>)</span></h3>", unsafe_allow_html=True)
         st.caption("Clean & Ready")
         
         # 1. SORTING: Unflipped ('No'/None) stay on top, Flipped ('Yes') drop to the bottom!
