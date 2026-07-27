@@ -408,7 +408,7 @@ else:
     # 1. VACANT DIRTY COLUMN (HIGH PRIORITY FLIPS)
     # ==========================================
     with col_vd:
-        st.markdown(f"<h3 style='margin-bottom: 0;'><span style='white-space: nowrap;'>🔴 V/D (<code>{len(vd_rooms)}</code>)</span></h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='margin-bottom: 0;'><span style='white-space: nowrap;'>🔴 V/D <code>{len(vd_rooms)}</code></span></h3>", unsafe_allow_html=True)
         st.caption("Check-outs")
         
         for rm, data in vd_rooms:
@@ -447,7 +447,7 @@ else:
     # 2. OCCUPIED COLUMN (STAYS & DUES)
     # ==========================================
     with col_od:
-        st.markdown(f"<h3 style='white-space: nowrap; margin-bottom: 0;'>🔵 S/O (<code>{len(od_rooms)}</code>)</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='white-space: nowrap; margin-bottom: 0;'>🔵 S/O <code>{len(od_rooms)}</code></h3>", unsafe_allow_html=True)
         st.caption("Due-outs & Stayovers")
         
         for rm, data in od_rooms:
@@ -513,7 +513,7 @@ else:
     # 3. VACANT CLEAN COLUMN (READY TO RENT)
     # ==========================================
     with col_vc:
-        st.markdown(f"<h3 style='margin-bottom: 0;'><span style='white-space: nowrap;'>🟢 V/C (<code>{len(vc_rooms)}</code>)</span></h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='margin-bottom: 0;'><span style='white-space: nowrap;'>🟢 V/C <code>{len(vc_rooms)}</code></span></h3>", unsafe_allow_html=True)
         st.caption("Clean & Ready")
         
         # 1. SORTING: Unflipped ('No'/None) stay on top, Flipped ('Yes') drop to the bottom!
