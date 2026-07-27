@@ -11,10 +11,10 @@ st.set_page_config(
     layout="wide",
 )
 
-head_col1, head_col2 = st.columns([0.85, 0.15])
+head_col1, head_col2 = st.columns([0.8, 0.2])
 
 with head_col1:
-    st.title("🧼 Housekeeping Operations Board")
+    st.title("🥷 Shadow HSK Board")
 
 with head_col2:
     with st.popover("ℹ️ SOPs & Help"):
@@ -210,7 +210,7 @@ if 'Vm_Flipped' not in live_df.columns:
 # ==============================================================================
 else:
     st.write(" ")
-    st.title("✨ Shadow PMS 🥷")
+    st.write("New Data Sheet")
 
     # --- ADMIN SAFEGUARD: NEW DAY RESET ---
     with st.expander("⚙️ Admin Options / Load New Day's Assignment Sheet"):
