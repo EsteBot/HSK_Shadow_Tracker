@@ -12,6 +12,19 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+st.markdown("""
+<style>
+    /* Remove default margins and padding from main Streamlit container */
+    .main .block-container {
+        padding-top: 1.5rem !important;
+        padding-bottom: 2rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        max-width: 100% !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # ==============================================================================
 # SIDEBAR: SOPS, HELP & QUICK UTILITIES
 # ==============================================================================
