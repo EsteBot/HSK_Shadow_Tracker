@@ -34,10 +34,11 @@ with head_col2:
         * **🟡 O/C:** Stayovers / Occupied clean.
         * **🟢 V/C:** Clean & ready.
         """)
+        st.caption("Originally created for Best Western at Firestone")
+        st.caption("By Esteban C Loetz")
 
 st.divider()
-    st.caption("Originally created for Best Western at Firestone")
-    st.caption("By Esteban C Loetz")
+    
 
 from streamlit_autorefresh import st_autorefresh
 # Run a silent refresh every 10 seconds to sync multi-device changes automatically
