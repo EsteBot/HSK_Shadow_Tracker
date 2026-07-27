@@ -20,10 +20,10 @@ with st.sidebar:
     with st.expander("📖 Visual Matrix Export SOP"):
         st.markdown("""
         **1.** Switch user to **Housekeeping**  
-        **2.** Select **Room Assign** $\rightarrow$ **Room Assignment**  
+        **2.** Select **Room Assign** ➔ **Room Assignment**  
         **3.** Assign rooms & click **Floppy Disk** icon to save  
-        **4.** Go to **Reports** $\rightarrow$ **Assignment Report**  
-        **5.** Click **Export** $\rightarrow$ **Excel**
+        **4.** Go to **Reports** ➔ **Assignment Report**  
+        **5.** Click **Export** ➔ **Excel**
         """)
         
     with st.expander("❓ How to Use the Board"):
@@ -403,7 +403,7 @@ else:
     # 1. VACANT DIRTY COLUMN (HIGH PRIORITY FLIPS)
     # ==========================================
     with col_vd:
-        sst.markdown(f"<h3 style='margin-bottom: 0;'><span style='white-space: nowrap;'>🔴 V/D (<code>{len(vd_rooms)}</code>)</span></h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='margin-bottom: 0;'><span style='white-space: nowrap;'>🔴 V/D (<code>{len(vd_rooms)}</code>)</span></h3>", unsafe_allow_html=True)
         st.caption("Check-outs")
         
         for rm, data in vd_rooms:
