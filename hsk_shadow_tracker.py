@@ -38,24 +38,17 @@ with head_col2:
 
 st.divider()
 
-# Top Column Summary Headers (Placed directly under Title)
-col_vd, col_od, col_vc = st.columns(3)
+st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🔴 Vacant Dirty (V/D)</h3>", unsafe_allow_html=True)
+st.caption("Flips - High Priority")
 
-with col_vd:
-    st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🔴 Vacant Dirty (V/D)</h3>", unsafe_allow_html=True)
-    st.caption("Flips - High Priority")
+st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🔵 Stay Over (S/O)</h3>", unsafe_allow_html=True)
+st.caption("Servicing / Due-outs & Stayovers")
 
-with col_od:
-    st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🔵 Stay Over (S/O)</h3>", unsafe_allow_html=True)
-    st.caption("Servicing / Due-outs & Stayovers")
-
-with col_vc:
-    st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🟢 Vacant Clean (V/C)</h3>", unsafe_allow_html=True)
-    st.caption("Ready to Rent")
+st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🟢 Vacant Clean (V/C)</h3>", unsafe_allow_html=True)
+st.caption("Ready to Rent")
 
 st.divider()
     
-
 from streamlit_autorefresh import st_autorefresh
 # Run a silent refresh every 10 seconds to sync multi-device changes automatically
 st_autorefresh(interval=10000, key="global_board_sync")
