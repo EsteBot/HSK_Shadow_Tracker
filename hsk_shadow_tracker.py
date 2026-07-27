@@ -6,7 +6,7 @@ from streamlit_gsheets import GSheetsConnection
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 st.set_page_config(
-    page_title="Housekeeping Hub", 
+    page_title="BWF HSK Hub", 
     page_icon="🧼", 
     layout="wide",
 )
