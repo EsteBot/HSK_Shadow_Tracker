@@ -12,47 +12,30 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-st.markdown("""
-<style>
-    /* Remove default margins and padding from main Streamlit container */
-    .main .block-container {
-        padding-top: 1.5rem !important;
-        padding-bottom: 2rem !important;
-        padding-left: 0.5rem !important;
-        padding-right: 0.5rem !important;
-        max-width: 100% !important;
-    }
-</style>
-""", unsafe_allow_html=True)
+head_col1, head_col2 = st.columns([0.85, 0.15])
 
-# ==============================================================================
-# SIDEBAR: SOPS, HELP & QUICK UTILITIES
-# ==============================================================================
-with st.sidebar:
-    st.title("🛎️ Housekeeping Hub")
-    st.caption("Shadow PMS Operations")
-    
-    st.divider()
-    
-    # Collapsible Visual Matrix SOP Guide
-    with st.expander("📖 Visual Matrix Export SOP"):
+with head_col1:
+    st.title("🧼 Housekeeping Operations Board")
+
+with head_col2:
+    with st.popover("ℹ️ SOPs & Help"):
+        st.markdown("### 📖 Visual Matrix Export SOP")
         st.markdown("""
-        **1.** Switch user to **Housekeeping**  
-        **2.** Select **Room Assign** ➔ **Room Assignment**  
-        **3.** Assign rooms & click **Floppy Disk** icon to save  
-        **4.** Go to **Reports** ➔ **Assignment Report**  
-        **5.** Click **Export** ➔ **Excel**
+        1. Switch user to **Housekeeping**  
+        2. Select **Room Assign** ➔ **Room Assignment**  
+        3. Assign rooms & click **Floppy Disk** icon to save  
+        4. Go to **Reports** ➔ **Assignment Report**  
+        5. Click **Export** ➔ **Excel**
         """)
-        
-    with st.expander("❓ How to Use the Board"):
+        st.divider()
+        st.markdown("### ❓ Quick Guide")
         st.markdown("""
-        * **🔴 V/D:** Check-outs that need cleaning.
-        * **🟡 O/C:** Stayovers or occupied rooms.
-        * **🟢 V/C:** Clean & ready rooms. Click **Mark Flipped in VM** once pushed to the PMS.
-        * **↩️ Undo:** Reverts accidental check-outs back to Occupied status.
+        * **🔴 V/D:** Check-outs needing clean.
+        * **🟡 O/C:** Stayovers / Occupied clean.
+        * **🟢 V/C:** Clean & ready.
         """)
 
-    st.divider()
+st.divider()
     st.caption("Originally created for Best Western at Firestone")
     st.caption("By Esteban C Loetz")
 
