@@ -282,6 +282,8 @@ else:
         st.rerun()
 
     # --- UI COMPONENT: UNSCHEDULED ROOM ADDITION ---
+    st.write("Insert Currently Untracked Room")
+    
     with st.expander("➕ **Add Unscheduled Room (Early Checkout or Service Request)**"):
         c_rm, c_note, c_co, c_stay = st.columns([1.5, 2.5, 1.5, 1.5])
         
@@ -313,6 +315,7 @@ else:
     
     # --- MAIN OPERATIONAL SHADOW BOARD ---
     st.markdown("## 🛎️ Room List")
+    st.write("")
 
     # Strip accidental float decimals: '105.0' -> '105'
     live_df['RM'] = live_df['RM'].astype(str).str.replace('.0', '', regex=False)
@@ -398,7 +401,7 @@ else:
         st.markdown(
         f"""
         <div style="height: 65px;">
-            <h3 style="margin: 0; padding: 0; white-space: nowrap;">🔴 V/D ({len(vd_rooms)})</h3>
+            <h3 style="margin: 0; padding: 0; white-space: nowrap;">🔴 V/D (<code>{len(vd_rooms)})</h3>
             <p style="margin: 0; padding: 0; color: gray; font-size: 0.9rem;">Check-outs</p>
         </div>
         """, 
@@ -517,7 +520,7 @@ else:
         st.markdown(
         f"""
         <div style="height: 65px;">
-            <h3 style="margin: 0; padding: 0; white-space: nowrap;">🟢 V/C ({len(vc_rooms)})</h3>
+            <h3 style="margin: 0; padding: 0; white-space: nowrap;">🟢 V/C (<code>{len(vc_rooms)})</h3>
             <p style="margin: 0; padding: 0; color: gray; font-size: 0.9rem;">Clean & Ready</p>
         </div>
         """, 
