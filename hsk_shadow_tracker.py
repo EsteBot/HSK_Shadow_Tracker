@@ -14,7 +14,7 @@ st.set_page_config(
 head_col1, head_col2 = st.columns([0.8, 0.2])
 
 with head_col1:
-    st.title("🥷 Shadow HSK Board")
+    st.subtitle("🥷 Shadow HSK Board")
 
 with head_col2:
     with st.popover("ℹ️ SOPs & Help"):
@@ -30,11 +30,28 @@ with head_col2:
         st.markdown("### ❓ Quick Guide")
         st.markdown("""
         * **🔴 V/D:** Check-outs needing clean.
-        * **🟡 O/C:** Stayovers / Occupied clean.
+        * **🔵 S/O:** Stayovers / Occupied clean.
         * **🟢 V/C:** Clean & ready.
         """)
         st.caption("Originally created for Best Western at Firestone")
         st.caption("By Esteban C Loetz")
+
+st.divider()
+
+# Top Column Summary Headers (Placed directly under Title)
+col_vd, col_od, col_vc = st.columns(3)
+
+with col_vd:
+    st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🔴 Vacant Dirty ({len(vd_rooms)})</h3>", unsafe_allow_html=True)
+    st.caption("Flips - High Priority")
+
+with col_od:
+    st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🔵 Stay Over ({len(od_rooms)})</h3>", unsafe_allow_html=True)
+    st.caption("Servicing / Due-outs & Stayovers")
+
+with col_vc:
+    st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🟢 Vacant Clean ({len(vc_rooms)})</h3>", unsafe_allow_html=True)
+    st.caption("Ready to Rent")
 
 st.divider()
     
@@ -238,24 +255,6 @@ else:
     
     # Create two columns up top to balance the layout
     top_c1, top_c2 = st.columns([1, 1])
-    
-    # Create our 3 main operational swimlanes
-    col_vd, col_od, col_vc = st.columns(3)
-
-    # 1. VACANT DIRTY (FLIPS - HIGH PRIORITY)
-    with col_vd:
-        st.subheader("🔴 Vacant Dirty (V/D)")
-        # Filter & render C/O rooms needing immediate turnover
-
-    # 2. OCCUPIED DIRTY (SERVICING)
-    with col_od:
-        st.subheader("🔵 Stay Over (S/O)")
-        # Filter & render Stayover / Due Out rooms
-
-    # 3. VACANT CLEAN (READY TO RENT)
-    with col_vc:
-        st.subheader("🟢 Vacant Clean (V/C)")
-        # Filter & render finished rooms
 
     # Updated Helper Function
     def inject_unscheduled_room(rm_num, action_type, note=""):
