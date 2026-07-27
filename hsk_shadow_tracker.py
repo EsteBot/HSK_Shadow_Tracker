@@ -9,7 +9,6 @@ st.set_page_config(
     page_title="Housekeeping Hub", 
     page_icon="🧼", 
     layout="wide",
-    initial_sidebar_state="collapsed"
 )
 
 head_col1, head_col2 = st.columns([0.85, 0.15])
