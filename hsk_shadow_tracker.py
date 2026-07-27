@@ -42,15 +42,15 @@ st.divider()
 col_vd, col_od, col_vc = st.columns(3)
 
 with col_vd:
-    st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🔴 Vacant Dirty ({len(vd_rooms)})</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🔴 Vacant Dirty (V/D)</h3>", unsafe_allow_html=True)
     st.caption("Flips - High Priority")
 
 with col_od:
-    st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🔵 Stay Over ({len(od_rooms)})</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🔵 Stay Over (S/O)</h3>", unsafe_allow_html=True)
     st.caption("Servicing / Due-outs & Stayovers")
 
 with col_vc:
-    st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🟢 Vacant Clean ({len(vc_rooms)})</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='margin:0; padding:0; white-space:nowrap;'>🟢 Vacant Clean (V/C)</h3>", unsafe_allow_html=True)
     st.caption("Ready to Rent")
 
 st.divider()
