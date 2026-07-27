@@ -14,7 +14,7 @@ st.set_page_config(
 head_col1, head_col2 = st.columns([0.8, 0.2])
 
 with head_col1:
-    st.subtitle("🥷 Shadow HSK Board")
+    st.header("🥷 Shadow HSK Board")
 
 with head_col2:
     with st.popover("ℹ️ SOPs & Help"):
