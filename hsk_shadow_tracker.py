@@ -209,7 +209,6 @@ if 'Vm_Flipped' not in live_df.columns:
 # MAIN SHADOW BOARD UI STARTS HERE
 # ==============================================================================
 else:
-    st.write(" ")
     st.write("New Data Sheet")
 
     # --- ADMIN SAFEGUARD: NEW DAY RESET ---
@@ -404,8 +403,15 @@ else:
     # 1. VACANT DIRTY COLUMN (HIGH PRIORITY FLIPS)
     # ==========================================
     with col_vd:
-        st.markdown(f"<h3 style='margin-bottom: 0;'><span style='white-space: nowrap;'>🔴 V/D <code>{len(vd_rooms)}</code></span></h3>", unsafe_allow_html=True)
-        st.caption("Check-outs")
+        st.markdown(
+        f"""
+        <div style="height: 65px;">
+            <h3 style="margin: 0; padding: 0; white-space: nowrap;">🔴 V/D ({len(vd_rooms)})</h3>
+            <p style="margin: 0; padding: 0; color: gray; font-size: 0.9rem;">Check-outs</p>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
         
         for rm, data in vd_rooms:
             card_style = "background-color: #ffebeb; color: #900; border-left: 6px solid #ff4d4d;"
@@ -443,8 +449,15 @@ else:
     # 2. OCCUPIED COLUMN (STAYS & DUES)
     # ==========================================
     with col_od:
-        st.markdown(f"<h3 style='white-space: nowrap; margin-bottom: 0;'>🔵 S/O <code>{len(od_rooms)}</code></h3>", unsafe_allow_html=True)
-        st.caption("Due-outs & Stayovers")
+        st.markdown(
+        f"""
+        <div style="height: 65px;">
+            <h3 style="margin: 0; padding: 0; white-space: nowrap;">🔵 S/O (<code>{len(od_rooms)}</code>)</h3>
+            <p style="margin: 0; padding: 0; color: gray; font-size: 0.9rem;">Due-outs & Stayovers</p>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
         
         for rm, data in od_rooms:
             is_dnd = data.get('DnD') == 'Yes'
@@ -509,8 +522,15 @@ else:
     # 3. VACANT CLEAN COLUMN (READY TO RENT)
     # ==========================================
     with col_vc:
-        st.markdown(f"<h3 style='margin-bottom: 0;'><span style='white-space: nowrap;'>🟢 V/C <code>{len(vc_rooms)}</code></span></h3>", unsafe_allow_html=True)
-        st.caption("Clean & Ready")
+        st.markdown(
+        f"""
+        <div style="height: 65px;">
+            <h3 style="margin: 0; padding: 0; white-space: nowrap;">🟢 V/C ({len(vc_rooms)})</h3>
+            <p style="margin: 0; padding: 0; color: gray; font-size: 0.9rem;">Clean & Ready</p>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
         
         # 1. SORTING: Unflipped ('No'/None) stay on top, Flipped ('Yes') drop to the bottom!
         vc_rooms_sorted = sorted(vc_rooms, key=lambda x: 1 if x[1].get('Vm_Flipped') == 'Yes' else 0)
