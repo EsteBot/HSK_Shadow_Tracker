@@ -16,7 +16,9 @@ st.markdown("""
     /* Remove artificial max-width constraint for responsive layout */
     .block-container { 
         padding-top: 2rem; 
-        padding-bottom: 2rem;
+        padding-bottom: 2rem
+        padding-left: 3rem !important;
+        padding-right: 3rem !important;
     }
     
     /* Consistent divider margins */
