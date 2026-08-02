@@ -333,31 +333,32 @@ with col_vd:
     st.write("")
     
     for rm, data in vd_rooms:
-        card_style = "background-color: #ffebeb; color: #900; border-left: 6px solid #ff4d4d;"
-        badge = "🚨 FLIP"
+    card_style = "background-color: #ffebeb; color: #900; border-left: 6px solid #ff4d4d;"
+    badge = "🚨 FLIP"
 
-        with st.container():
-            note_text = render_room_card(rm, data, card_style, badge)
+    # Enclose room + action button in a bordered container with vertical margin
+    with st.container(border=True):
+        note_text = render_room_card(rm, data, card_style, badge)
+        
+        with st.popover(f"⚙️ Action: Room {rm}", use_container_width=True):
+            if st.button("✨ Mark Clean & Ready", key=f"cln_vd_{rm}", type="primary"):
+                update_room_state(rm, new_cln='C')
             
-            with st.popover(f"⚙️ Action: Room {rm}", use_container_width=True):
-                if st.button("✨ Mark Clean & Ready", key=f"cln_vd_{rm}", type="primary"):
-                    update_room_state(rm, new_cln='C')
-                
-                st.divider()
+            st.divider()
 
-                if st.button("↩️ Undo Checkout (Mark Occupied)", key=f"undo_co_{rm}"):
-                    update_room_state(rm, new_occ='O', new_cln='D')
-                    st.toast(f"Room {rm} reverted to Occupied!", icon="↩️")
+            if st.button("↩️ Undo Checkout (Mark Occupied)", key=f"undo_co_{rm}"):
+                update_room_state(rm, new_occ='O', new_cln='D')
+                st.toast(f"Room {rm} reverted to Occupied!", icon="↩️")
 
-                st.divider()
-                
-                updated_note = st.text_input("Room Note / Instruction", value=note_text, key=f"note_vd_{rm}")
-                if st.button("💾 Save Note", key=f"save_vd_note_{rm}"):
-                    idx = live_df[live_df['RM'] == str(rm)].index[0]
-                    live_df.at[idx, 'Note'] = updated_note
-                    conn.update(worksheet="Sheet1", data=live_df)
-                    st.cache_data.clear()
-                    st.rerun()
+            st.divider()
+            
+            updated_note = st.text_input("Room Note / Instruction", value=note_text, key=f"note_vd_{rm}")
+            if st.button("💾 Save Note", key=f"save_vd_note_{rm}"):
+                idx = live_df[live_df['RM'] == str(rm)].index[0]
+                live_df.at[idx, 'Note'] = updated_note
+                conn.update(worksheet="Sheet1", data=live_df)
+                st.cache_data.clear()
+                st.rerun()
 
 # 2. OCCUPIED (STAYS & DUES)
 with col_od:
