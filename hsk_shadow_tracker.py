@@ -4,25 +4,27 @@ from streamlit_gsheets import GSheetsConnection
 from streamlit_autorefresh import st_autorefresh
 
 # --- PAGE CONFIGURATION ---
-st.set_page_config(
-    page_title="BWF HSK Hub", 
-    page_icon="🧼", 
-    layout="wide",
-)
-
-# --- GLOBAL STYLING ---
 st.markdown("""
     <style>
-    /* Remove artificial max-width constraint for responsive layout */
-    /* Force symmetrical left/right margins and prevent sidebar offset skew */
+    /* Default spacing for MOBILE displays (narrow screens) */
     .block-container { 
-        padding-top: 2rem !important; 
+        padding-top: 1rem !important; 
         padding-bottom: 2rem !important;
-        padding-left: 10rem !important;
-        padding-right: 10rem !important;
-        max-width: 96% !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        max-width: 100% !important;
+    }
+
+    /* DESKTOP & TABLET override (screens wider than 768px) */
+    @media (min-width: 768px) {
+        .block-container { 
+            padding-top: 2rem !important; 
+            padding-left: 10rem !important;
+            padding-right: 10rem !important;
+            max-width: 96% !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
     }
 
     /* Keep inner main content strictly centered */
