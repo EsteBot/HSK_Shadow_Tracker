@@ -324,7 +324,7 @@ for rm in sorted_rooms:
         od_rooms.append((rm, room_data))
 
 # Render Layout Columns
-col_vd, col_od, col_vc = st.columns(3)
+col_vd, col_od, col_vc = st.columns(3, gap="large")
 
 # 1. VACANT DIRTY
 with col_vd:
