@@ -14,11 +14,20 @@ st.set_page_config(
 st.markdown("""
     <style>
     /* Remove artificial max-width constraint for responsive layout */
+    /* Force symmetrical left/right margins and prevent sidebar offset skew */
     .block-container { 
-        padding-top: 2rem; 
-        padding-bottom: 2rem
-        padding-left: 10rem !important;
-        padding-right: 10rem !important;
+        padding-top: 2rem !important; 
+        padding-bottom: 2rem !important;
+        padding-left: 4rem !important;
+        padding-right: 4rem !important;
+        max-width: 96% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    /* Keep inner main content strictly centered */
+    [data-testid="stMainBlockContainer"] {
+        margin: 0 auto !important;
     }
     
     /* Consistent divider margins */
