@@ -345,6 +345,8 @@ with col_vd:
                     update_room_state(rm, new_cln='C')
                 
                 st.divider()
+
+                st.html('<div style="height: 18px;"></div>')
     
                 if st.button("↩️ Undo Checkout (Mark Occupied)", key=f"undo_co_{rm}"):
                     update_room_state(rm, new_occ='O', new_cln='D')
