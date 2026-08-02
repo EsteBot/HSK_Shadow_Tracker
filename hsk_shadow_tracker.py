@@ -51,6 +51,11 @@ st.markdown("""
         border-color: #1565C0 !important;
         color: white !important;
     }
+
+    /* Add vertical spacing between room containers */
+    div[data-testid="stVerticalBlock"] > div[data-testid="element-container"] + div[data-testid="stElementContainer"] {
+    margin-top: 0.75rem !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -371,51 +376,50 @@ with col_od:
         cln = str(data.get('Cleanliness', 'D')).strip()
         workload = str(data.get('Workload', 'S')).strip()
         is_stayover = (workload == 'S')
+    
+    if is_dnd and is_stayover:
+        card_style = "background-color: #e0e0e0; color: #555; border-left: 6px solid #9e9e9e;"
+        badge = "🔘 DnD"
+    elif cln == 'C':
+        card_style = "background-color: #e6f4ea; color: #137333; border-left: 6px solid #34a853;"
+        badge = "🟢 SERVICED"
+    elif is_stayover:
+        card_style = "background-color: #eaf4ff; color: #004085; border-left: 6px solid #3399ff;"
+        badge = "🔵 STAY"
+    else:
+        card_style = "background-color: #fff3cd; color: #856404; border-left: 6px solid #ffc107;"
+        badge = "🟡 DUE OUT"
+
+    with st.container(border=True):
+        note_text = render_room_card(rm, data, card_style, badge)
         
-        if is_dnd and is_stayover:
-            card_style = "background-color: #e0e0e0; color: #555; border-left: 6px solid #9e9e9e;"
-            badge = "🔘 DnD"
-        elif cln == 'C':
-            card_style = "background-color: #e6f4ea; color: #137333; border-left: 6px solid #34a853;"
-            badge = "🟢 SERVICED"
-        elif is_stayover:
-            card_style = "background-color: #eaf4ff; color: #004085; border-left: 6px solid #3399ff;"
-            badge = "🔵 STAY"
-        else:
-            card_style = "background-color: #fff3cd; color: #856404; border-left: 6px solid #ffc107;"
-            badge = "🟡 DUE OUT"
-
-        with st.container():
-            note_text = render_room_card(rm, data, card_style, badge)
-            
-            with st.popover(f"⚙️ Action: Room {rm}", use_container_width=True):
-                if is_stayover:
-                    btn_clean_text = "✨ Mark Serviced" if cln != 'C' else "↩️ Mark Dirty"
-                    new_status = 'C' if cln != 'C' else 'D'
-                    if st.button(f"{btn_clean_text}", key=f"cln_od_{rm}"):
-                        update_room_state(rm, new_cln=new_status)
-                    
-                    dnd_label = "Remove DnD" if is_dnd else "Set DnD"
-                    if st.button(f"🚫 {dnd_label}", key=f"dnd_od_{rm}"):
-                        update_room_state(rm, toggle_dnd=True)
-                else:
-                    if st.button("🚪 Guest Checked Out", key=f"co_{rm}", type="primary"):
-                        update_room_state(rm, new_occ='V', new_cln='D')
-                        
-                    if st.button("🔄 Extended Stay (Convert to Stayover)", key=f"ext_{rm}"):
-                        update_room_state(rm, new_workload='S')
-                        st.toast(f"Room {rm} converted to Stayover!", icon="🔄")
-
-                st.divider()
+        with st.popover(f"⚙️ Action: Room {rm}", use_container_width=True):
+            if is_stayover:
+                btn_clean_text = "✨ Mark Serviced" if cln != 'C' else "↩️ Mark Dirty"
+                new_status = 'C' if cln != 'C' else 'D'
+                if st.button(f"{btn_clean_text}", key=f"cln_od_{rm}"):
+                    update_room_state(rm, new_cln=new_status)
                 
-                updated_note = st.text_input("Room Note / Instruction", value=note_text, key=f"note_od_{rm}")
-                if st.button("💾 Save Note", key=f"save_od_note_{rm}"):
-                    idx = live_df[live_df['RM'] == str(rm)].index[0]
-                    live_df.at[idx, 'Note'] = updated_note
-                    conn.update(worksheet="Sheet1", data=live_df)
-                    st.cache_data.clear()
-                    st.rerun()
+                dnd_label = "Remove DnD" if is_dnd else "Set DnD"
+                if st.button(f"🚫 {dnd_label}", key=f"dnd_od_{rm}"):
+                    update_room_state(rm, toggle_dnd=True)
+            else:
+                if st.button("🚪 Guest Checked Out", key=f"co_{rm}", type="primary"):
+                    update_room_state(rm, new_occ='V', new_cln='D')
+                    
+                if st.button("🔄 Extended Stay (Convert to Stayover)", key=f"ext_{rm}"):
+                    update_room_state(rm, new_workload='S')
+                    st.toast(f"Room {rm} converted to Stayover!", icon="🔄")
 
+            st.divider()
+            
+            updated_note = st.text_input("Room Note / Instruction", value=note_text, key=f"note_od_{rm}")
+            if st.button("💾 Save Note", key=f"save_od_note_{rm}"):
+                idx = live_df[live_df['RM'] == str(rm)].index[0]
+                live_df.at[idx, 'Note'] = updated_note
+                conn.update(worksheet="Sheet1", data=live_df)
+                st.cache_data.clear()
+                st.rerun()
 # 3. VACANT CLEAN
 with col_vc:
     st.markdown(f"### 🟢 V/C (`{len(vc_rooms)}`)")
@@ -426,7 +430,7 @@ with col_vc:
     
     for rm, data in vc_rooms_sorted:
         is_flipped = data.get('Vm_Flipped') == 'Yes'
-        
+    
         if is_flipped:
             card_style = "background-color: #f1f3f4; color: #5f6368; border-left: 6px solid #9aa0a6; opacity: 0.65;"
             badge = "✔️ IN VM"
@@ -434,7 +438,7 @@ with col_vc:
             card_style = "background-color: #e6f4ea; color: #137333; border-left: 6px solid #34a853;"
             badge = "🟢 READY"
         
-        with st.container():
+        with st.container(border=True):
             note_text = render_room_card(rm, data, card_style, badge)
             
             with st.popover(f"⚙️ Action: Room {rm}", use_container_width=True):
@@ -453,12 +457,12 @@ with col_vc:
                         conn.update(worksheet="Sheet1", data=live_df)
                         st.cache_data.clear()
                         st.rerun()
-
+    
                 st.divider()
-
+    
                 if st.button("↩️ Re-open as Dirty", key=f"reopen_{rm}"):
                     update_room_state(rm, new_cln='D')
-
+    
                 st.divider()
                 
                 updated_note = st.text_input("Room Note / Instruction", value=note_text, key=f"note_vc_{rm}")
