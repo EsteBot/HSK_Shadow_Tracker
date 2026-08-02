@@ -329,7 +329,7 @@ col_vd, col_od, col_vc = st.columns(3, gap="large")
 # 1. VACANT DIRTY
 with col_vd:
     st.markdown(f"### 🔴 V/D (`{len(vd_rooms)}`)")
-    st.caption("Check-outs — High Priority")
+    st.caption("Check-outs")
     st.write("")
     
     for rm, data in vd_rooms:
@@ -345,8 +345,6 @@ with col_vd:
                     update_room_state(rm, new_cln='C')
                 
                 st.divider()
-
-                st.html('<div style="height: 18px;"></div>')
     
                 if st.button("↩️ Undo Checkout (Mark Occupied)", key=f"undo_co_{rm}"):
                     update_room_state(rm, new_occ='O', new_cln='D')
@@ -361,6 +359,8 @@ with col_vd:
                     conn.update(worksheet="Sheet1", data=live_df)
                     st.cache_data.clear()
                     st.rerun()
+
+        st.html('<div style="height: 18px;"></div>')
 
 # 2. OCCUPIED (STAYS & DUES)
 with col_od:
