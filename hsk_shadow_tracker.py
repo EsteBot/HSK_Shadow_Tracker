@@ -360,7 +360,7 @@ with col_vd:
                     st.cache_data.clear()
                     st.rerun()
 
-        st.html('<div style="height: 18px;"></div>')
+        st.html('<div style="height: 15px;"></div>')
 
 # 2. OCCUPIED (STAYS & DUES)
 with col_od:
@@ -417,6 +417,9 @@ with col_od:
                     conn.update(worksheet="Sheet1", data=live_df)
                     st.cache_data.clear()
                     st.rerun()
+
+        st.html('<div style="height: 15px;"></div>')
+
 # 3. VACANT CLEAN
 with col_vc:
     st.markdown(f"### 🟢 V/C (`{len(vc_rooms)}`)")
@@ -469,3 +472,4 @@ with col_vc:
                     conn.update(worksheet="Sheet1", data=live_df)
                     st.cache_data.clear()
                     st.rerun()
+        st.html('<div style="height: 15px;"></div>')
