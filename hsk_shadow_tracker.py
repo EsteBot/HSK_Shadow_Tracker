@@ -17,8 +17,8 @@ st.markdown("""
     .block-container { 
         padding-top: 2rem; 
         padding-bottom: 2rem
-        padding-left: 3rem !important;
-        padding-right: 3rem !important;
+        padding-left: 10rem !important;
+        padding-right: 10rem !important;
     }
     
     /* Consistent divider margins */
