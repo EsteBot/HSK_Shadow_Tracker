@@ -52,10 +52,6 @@ st.markdown("""
         color: white !important;
     }
 
-    /* Add vertical spacing between room containers */
-    div[data-testid="stVerticalBlock"] > div[data-testid="element-container"] + div[data-testid="stElementContainer"] {
-    margin-top: 0.75rem !important;
-    }
     </style>
 """, unsafe_allow_html=True)
 
