@@ -18,8 +18,8 @@ st.markdown("""
     .block-container { 
         padding-top: 2rem !important; 
         padding-bottom: 2rem !important;
-        padding-left: 4rem !important;
-        padding-right: 4rem !important;
+        padding-left: 10rem !important;
+        padding-right: 10rem !important;
         max-width: 96% !important;
         margin-left: auto !important;
         margin-right: auto !important;
