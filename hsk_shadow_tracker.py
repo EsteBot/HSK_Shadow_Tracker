@@ -19,11 +19,6 @@ st.markdown("""
         padding-bottom: 2rem;
     }
     
-    /* Clean up vertical block gaps */
-    div[data-testid="stVerticalBlock"] > div { 
-        padding-bottom: 0px; 
-    }
-    
     /* Consistent divider margins */
     hr { 
         margin-top: 0.8rem; 
@@ -52,11 +47,10 @@ st.markdown("""
         color: white !important;
     }
 
-    /* Add vertical spacing between room containers */
-    div[data-testid="stVerticalBlock"] > div[data-testid="element-container"] + div[data-testid="stElementContainer"] {
-    margin-top: 0.75rem !important;
+    /* Target Streamlit's bordered container wrapper directly for chunkier spacing */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        margin-bottom: 1.25rem !important;
     }
-
     </style>
 """, unsafe_allow_html=True)
 
